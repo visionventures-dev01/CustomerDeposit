@@ -1,0 +1,53 @@
+@model VoucherListViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "เวาเชอร์ของฉัน";
+    string Page(int p) => Url.Action("Index", new { tab = Model.Tab, q = Model.Search, page = p })!;
+}
+<h1 class="sr-only">เวาเชอร์ของฉัน ยอดคงเหลือรวม @Fmt.Thb(Model.ActiveBalance)</h1>
+<section class="panel">
+    <div class="toolbar">
+        <form method="get" asp-action="Index" class="search-field">
+            <input type="hidden" name="tab" value="@Model.Tab" />
+            <span class="sr-only">ค้นหาหมายเลขเวาเชอร์</span>
+            <input name="q" value="@Model.Search" placeholder="ค้นหาหมายเลขเวาเชอร์" />
+        </form>
+        <div class="filter-tabs" aria-label="กรองสถานะ">
+            <a class="@(Model.Tab == "active" ? "active" : "")" asp-action="Index" asp-route-tab="active" asp-route-q="@Model.Search">เวาเชอร์ที่เปิดใช้งาน</a>
+            <a class="@(Model.Tab == "used" ? "active" : "")" asp-action="Index" asp-route-tab="used" asp-route-q="@Model.Search">เวาเชอร์ที่ใช้หมดแล้ว</a>
+        </div>
+    </div>
+    @if (Model.Items.Count > 0)
+    {
+        <div class="data-list">
+            @foreach (var v in Model.Items)
+            {
+                <article class="voucher-row">
+                    <div class="voucher-identity">
+                        <h3>@v.DepositNo</h3>
+                        <span class="status-badge @OrderStatusMap.VoucherKind(v.Status)">@OrderStatusMap.VoucherLabel(v.Status)</span>
+                    </div>
+                    <div class="money-cell">
+                        <span>ยอดเวาเชอร์คงเหลือ</span>
+                        <strong>@Fmt.Thb(v.DepositBalance)</strong>
+                    </div>
+                    <a class="secondary-button" asp-action="Detail" asp-route-id="@v.DepositNo">ดูข้อมูลเวาเชอร์เล่มนี้ ›</a>
+                </article>
+            }
+        </div>
+        <div class="pagination" aria-label="เปลี่ยนหน้า">
+            <a class="@(Model.Page == 1 ? "disabled" : "")" href="@Page(Model.Page - 1)">ก่อนหน้า</a>
+            <span>หน้า @Model.Page จาก @Model.TotalPages</span>
+            <a class="@(Model.Page == Model.TotalPages ? "disabled" : "")" href="@Page(Model.Page + 1)">ถัดไป</a>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <span>0 results</span>
+            <h3>ไม่พบเวาเชอร์</h3>
+            <p>ไม่พบผลลัพธ์สำหรับ “@(string.IsNullOrEmpty(Model.Search) ? "ตัวกรองนี้" : Model.Search)”</p>
+            <a class="secondary-button" asp-action="Index">ล้างตัวกรอง</a>
+        </div>
+    }
+</section>

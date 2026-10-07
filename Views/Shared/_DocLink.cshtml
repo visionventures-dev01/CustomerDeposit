@@ -1,0 +1,2 @@
+@model (string Label, string Kind, string Deposit)
+<a class="document-link" target="_blank" rel="noopener" href="@Url.Action("Pdf", "Document", new { no = Model.Label, kind = Model.Kind, deposit = Model.Deposit })"><strong>@Model.Label</strong></a>

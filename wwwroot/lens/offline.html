@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b3455" />
+    <title>Lens Voucher — ออฟไลน์</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        color: #0b2035;
+        background: #f4f7fb;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main {
+        width: min(100%, 440px);
+        padding: 36px;
+        border: 1px solid #d7e1ec;
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow: 0 18px 50px rgba(11, 52, 85, 0.12);
+      }
+      .mark {
+        display: grid;
+        width: 56px;
+        height: 56px;
+        place-items: center;
+        margin-bottom: 24px;
+        border-radius: 16px;
+        color: #ffffff;
+        background: #0b3455;
+        font-weight: 800;
+      }
+      h1 { margin: 0 0 12px; font-size: 28px; }
+      p { margin: 0 0 24px; color: #52677d; line-height: 1.65; }
+      button {
+        width: 100%;
+        padding: 13px 18px;
+        border: 0;
+        border-radius: 12px;
+        color: #ffffff;
+        background: #0868b9;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:focus-visible { outline: 3px solid #68c4ff; outline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">LV</div>
+      <h1>ยังเชื่อมต่อไม่ได้</h1>
+      <p>Lens Voucher ต้องเชื่อมต่อระบบเพื่อเข้าสู่ระบบและโหลดข้อมูลล่าสุด กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง</p>
+      <button type="button" onclick="location.reload()">ลองเชื่อมต่ออีกครั้ง</button>
+    </main>
+  </body>
+</html>

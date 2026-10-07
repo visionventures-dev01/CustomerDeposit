@@ -1,0 +1,35 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "เข้าสู่ระบบ"; }
+<main class="auth-shell">
+    <header class="auth-header">
+        <partial name="_Brand" />
+        <partial name="_VersionBadge" />
+    </header>
+    <section class="auth-stage single-card">
+        <form class="auth-card" asp-action="RequestOtp" method="post" novalidate>
+            <h1>เข้าสู่ระบบด้วย OTP</h1>
+            <p class="subtle">กรุณากรอกรายละเอียดเพื่อรับ one-time password</p>
+            <label for="phone">กรอกเบอร์โทรศัพท์</label>
+            <div class="phone-request-row">
+                <input id="phone" name="phone" inputmode="numeric" autocomplete="tel" type="tel" pattern="[0-9]{10}"
+                       placeholder="กรอกเบอร์โทรศัพท์ 10 หลัก" value="@Model.Phone" maxlength="10"
+                       aria-invalid="@(Model.Error is null ? "false" : "true")" />
+                <button class="request-button" type="submit">Request<br />OTP</button>
+            </div>
+            @if (Model.Error is not null)
+            {
+                <p id="phone-error" class="field-error">@Model.Error</p>
+            }
+            <label for="otp-preview">กรอกรหัส OTP</label>
+            <input id="otp-preview" placeholder="กรอกรหัส OTP" disabled />
+            <button class="primary-button" type="button" disabled>เข้าสู่ระบบ</button>
+        </form>
+    </section>
+</main>
+@section Scripts {
+    <script>
+        document.getElementById('phone').addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+    </script>
+}

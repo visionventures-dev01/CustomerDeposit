@@ -1,0 +1,21 @@
+@model AdminLookupViewModel
+@{ ViewData["Title"] = "Lens Voucher Admin"; }
+<main aria-label="Lens Voucher admin workspace" class="admin-entry-page">
+    <section class="admin-phone-card" aria-labelledby="adminPhoneTitle">
+        <h1 id="adminPhoneTitle">Lens Voucher Admin</h1>
+        <form class="admin-phone-form" asp-action="Lookup" method="post">
+            <label for="admin-phone-search">กรอกเบอร์โทรศัพท์</label>
+            <div class="admin-phone-row">
+                <input id="admin-phone-search" name="phone" placeholder="กรอกเบอร์โทรศัพท์" type="text" value="@Model.Phone" maxlength="100" autofocus />
+                <button type="submit">เข้าสู่ระบบ</button>
+            </div>
+            @if (Model.Error is not null)
+            {
+                <p class="admin-lookup-status">@Model.Error</p>
+            }
+        </form>
+        <form asp-action="Logout" method="post" style="margin-top:16px">
+            <button type="submit" class="text-button">ออกจากระบบผู้ดูแล</button>
+        </form>
+    </section>
+</main>

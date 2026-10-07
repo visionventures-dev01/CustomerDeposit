@@ -1,0 +1,87 @@
+@model OrderListViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "คำสั่งซื้อ";
+    var sortNow = Model.Ascending ? "asc" : "desc";
+    var sortNext = Model.Ascending ? "desc" : "asc";
+}
+<section class="panel">
+    <div class="toolbar">
+        <form method="get" asp-action="Index" class="search-field">
+            <input type="hidden" name="cancelled" value="@Model.Cancelled.ToString().ToLowerInvariant()" />
+            <input type="hidden" name="sort" value="@sortNow" />
+            <span class="sr-only">ค้นหาเลขที่เอกสาร</span>
+            <input name="q" value="@Model.Search" placeholder="ค้นหาเลขที่ SO, SI หรือ CN" />
+        </form>
+        <div class="filter-tabs">
+            <a class="@(!Model.Cancelled ? "active" : "")" asp-action="Index" asp-route-q="@Model.Search" asp-route-sort="@sortNow">คำสั่งซื้อทั้งหมด</a>
+            <a class="@(Model.Cancelled ? "active" : "")" asp-action="Index" asp-route-q="@Model.Search" asp-route-cancelled="true" asp-route-sort="@sortNow">คำสั่งซื้อที่ยกเลิก</a>
+        </div>
+    </div>
+    @if (Model.Items.Count > 0)
+    {
+        <div class="order-table-wrap">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="sort-link" title="@(Model.Ascending ? "Sort Descending" : "Sort Ascending")"
+                               asp-action="Index" asp-route-q="@Model.Search" asp-route-cancelled="@Model.Cancelled" asp-route-sort="@sortNext">
+                                <span>เอกสารวันที่</span>
+                                <span aria-hidden="true" style="color:#5f6b7a;font-size:16px">@(Model.Ascending ? "↑" : "↓")</span>
+                            </a>
+                        </th>
+                        <th>เอกสาร SO</th>
+                        <th>เอกสารขาย</th>
+                        <th>ใบลดหนี้</th>
+                        <th>สถานะ</th>
+                        <th>วิธีชำระ</th>
+                        <th class="align-right">ยอดรวมทั้งหมด (บาท)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.Items)
+                    {
+                        var href = Url.Action("Detail", new { id = o.Id });
+                        <tr>
+                            <td>@Fmt.DateNumeric(o.Date)</td>
+                            <td><a class="document-link" href="@href">@o.DisplayNo</a></td>
+                            <td>
+                                @if (o.SalesInvoiceNo.Length > 0)
+                                {
+                                    <a class="document-link" href="@href">@o.SalesInvoiceNo</a>
+                                }
+                                else
+                                {
+                                    <text>-</text>
+                                }
+                            </td>
+                            <td>
+                                @if (o.CreditNoteNo.Length > 0)
+                                {
+                                    <a class="document-link" href="@href">@o.CreditNoteNo</a>
+                                }
+                                else
+                                {
+                                    <text>-</text>
+                                }
+                            </td>
+                            <td><span class="status-badge @OrderStatusMap.Kind(o.Status)">@OrderStatusMap.Label(o.Status)</span></td>
+                            <td>@(o.PaymentMethod.Length > 0 ? o.PaymentMethod : "วอยเชอร์")</td>
+                            <td class="align-right"><strong>@Fmt.Number(o.TotalAmount)</strong></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <span>0 results</span>
+            <h3>ไม่พบคำสั่งซื้อ</h3>
+            <p>ไม่พบผลลัพธ์สำหรับ “@(string.IsNullOrEmpty(Model.Search) ? "ตัวกรองนี้" : Model.Search)”</p>
+            <a class="secondary-button" asp-action="Index">ล้างตัวกรอง</a>
+        </div>
+    }
+</section>

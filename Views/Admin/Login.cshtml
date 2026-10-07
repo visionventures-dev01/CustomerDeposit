@@ -1,0 +1,33 @@
+@model AdminLoginViewModel
+@{ ViewData["Title"] = "Lens Voucher Admin"; }
+<main class="admin-login-page" aria-labelledby="adminLoginTitle">
+    <section class="admin-login-card">
+        <div class="admin-login-brand">
+            <div class="admin-login-logo" aria-hidden="true">LV</div>
+            <h1 id="adminLoginTitle">
+                Lens Voucher
+                <span>Admin</span>
+            </h1>
+        </div>
+
+        <form class="admin-login-form" asp-action="Login" method="post">
+            @if (Model.Error is not null)
+            {
+                <p class="admin-login-error">@Model.Error</p>
+            }
+            <label>
+                Username
+                <input autocomplete="username" name="username" placeholder="กรอก Username" required type="text" value="@Model.Username" maxlength="150" />
+            </label>
+            <label>
+                Password
+                <input autocomplete="current-password" name="password" placeholder="กรอก Password" required type="password" maxlength="500" />
+            </label>
+            <label class="admin-login-remember">
+                <input name="remember" type="checkbox" value="true" />
+                <span>จดจำการเข้าสู่ระบบ</span>
+            </label>
+            <button type="submit">เข้าสู่ระบบ</button>
+        </form>
+    </section>
+</main>

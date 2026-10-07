@@ -1,0 +1,77 @@
+@model VerifyViewModel
+@{ ViewData["Title"] = "ยืนยัน OTP"; }
+<main class="auth-shell">
+    <header class="auth-header">
+        <partial name="_Brand" />
+        <partial name="_VersionBadge" />
+    </header>
+    <section class="auth-stage single-card">
+        <div class="auth-card otp-card">
+            <h1>เข้าสู่ระบบด้วย OTP</h1>
+            <p class="subtle">กรุณากรอกรายละเอียดเพื่อรับ one-time password</p>
+
+            <label for="phone-confirm">กรอกเบอร์โทรศัพท์</label>
+            <form asp-action="RequestOtp" method="post" class="phone-request-row" id="resend-form">
+                <input id="phone-confirm" name="phone" value="@Model.Phone" readonly />
+                <button class="request-button" type="submit" id="resend-btn" disabled>Request<br />OTP</button>
+            </form>
+
+            <form asp-action="Verify" method="post" novalidate style="display:contents">
+                <input type="hidden" name="requestId" value="@Model.RequestId" />
+                <input type="hidden" name="phone" value="@Model.Phone" />
+                <input type="hidden" name="ref" value="@Model.ReferenceCode" />
+                <input type="hidden" name="expires" id="expires-field" value="@Model.ExpiresInSeconds" />
+                <label for="otp">กรอกรหัส OTP</label>
+                <input id="otp" name="code" inputmode="numeric" autocomplete="one-time-code" placeholder="กรอกรหัส OTP"
+                       maxlength="6" autofocus aria-invalid="@(Model.Error is null ? "false" : "true")" />
+                <p id="otp-hint" class="input-hint">รหัสถูกส่งไปยัง @Fmt.MaskPhone(Model.Phone)@(Model.ReferenceCode.Length > 0 ? " · Ref: " + Model.ReferenceCode : "")<span id="otp-expiry"></span></p>
+                @if (Model.DemoMode)
+                {
+                    <p class="input-hint">โหมดทดสอบ (Development): ไม่ได้ส่ง SMS จริง</p>
+                }
+                @if (Model.Error is not null)
+                {
+                    <p id="otp-error" class="field-error">@Model.Error</p>
+                }
+                <button class="primary-button" type="submit" id="verify-btn" disabled>เข้าสู่ระบบ</button>
+            </form>
+            <a class="text-button auth-back" asp-action="Login">เปลี่ยนเบอร์โทรศัพท์</a>
+        </div>
+    </section>
+</main>
+@section Scripts {
+    <script>
+        (function () {
+            var otp = document.getElementById('otp');
+            var verify = document.getElementById('verify-btn');
+            var expires = @Model.ExpiresInSeconds;
+            var expiryEl = document.getElementById('otp-expiry');
+            var expiresField = document.getElementById('expires-field');
+            function updateVerify() { verify.disabled = otp.value.length !== 6 || expires <= 0; }
+            function renderExpiry() {
+                expiresField.value = expires;
+                expiryEl.textContent = expires > 0
+                    ? ' · หมดอายุใน ' + Math.floor(expires / 60) + ':' + String(expires % 60).padStart(2, '0') + ' นาที'
+                    : ' · รหัสหมดอายุแล้ว';
+                updateVerify();
+            }
+            otp.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 6);
+                updateVerify();
+            });
+            renderExpiry();
+            (function expTick() { if (expires > 0) { setTimeout(function () { expires--; renderExpiry(); expTick(); }, 1000); } })();
+            var left = @Model.ResendAfterSeconds;
+            var btn = document.getElementById('resend-btn');
+            function tick() {
+                if (left > 0) {
+                    btn.innerHTML = 'ส่งอีกครั้ง<br />00:' + String(left).padStart(2, '0');
+                    btn.disabled = true; left--; setTimeout(tick, 1000);
+                } else {
+                    btn.innerHTML = 'Request<br />OTP'; btn.disabled = false;
+                }
+            }
+            tick();
+        })();
+    </script>
+}

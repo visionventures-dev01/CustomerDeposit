@@ -1,0 +1,12 @@
+/* รีเซ็ตพื้นฐานแทน Tailwind preflight ที่ระบบเดิมพึ่งพาอยู่ */
+*, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: currentColor; }
+h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
+h1, h2, h3, h4 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; text-decoration: inherit; }
+button, input, select, textarea { font: inherit; letter-spacing: inherit; color: inherit; margin: 0; background: transparent; border-radius: 0; }
+button { cursor: pointer; padding: 0; }
+button:disabled { cursor: default; }
+table { border-collapse: collapse; text-indent: 0; border-color: inherit; }
+img, svg { display: block; max-width: 100%; }
+ul, ol { list-style: none; margin: 0; padding: 0; }
+[hidden] { display: none !important; }

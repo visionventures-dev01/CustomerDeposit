@@ -1,0 +1,61 @@
+@model OrderGroup
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = Model.DisplayNo;
+    var progress = OrderStatusMap.Progress(Model.Status);
+    var steps = new[] { "รับคำสั่งซื้อ", "กำลังผลิต", "กำลังจัดส่ง", "ส่งมอบ" };
+}
+<a class="text-button page-back" asp-action="Index">← กลับไปหน้าออเดอร์</a>
+<section class="detail-hero order-hero">
+    <div>
+        <span class="status-badge @OrderStatusMap.Kind(Model.Status)">@OrderStatusMap.Label(Model.Status)</span>
+        <p class="eyebrow">ORDER DETAIL</p>
+        <h1>@Model.DisplayNo</h1>
+        <p>สั่งซื้อเมื่อ @Fmt.DateThai(Model.Date)</p>
+    </div>
+    <div class="order-total">
+        <span>ยอดรวมทั้งหมด</span>
+        <strong>@Fmt.Thb(Model.TotalAmount)</strong>
+    </div>
+</section>
+<section class="detail-grid">
+    <div class="info-card">
+        <h2>ข้อมูลเอกสาร</h2>
+        <div class="info-row"><span>เอกสาร SO</span><strong>@Model.SalesOrderNo</strong></div>
+        <div class="info-row"><span>เอกสารขาย</span><strong>@(Model.SalesInvoiceNo.Length > 0 ? Model.SalesInvoiceNo : "ยังไม่มี")</strong></div>
+        <div class="info-row"><span>ใบลดหนี้</span><strong>@(Model.CreditNoteNo.Length > 0 ? Model.CreditNoteNo : "ไม่มี")</strong></div>
+        <div class="info-row"><span>วิธีชำระเงิน</span><strong>@(Model.PaymentMethod.Length > 0 ? Model.PaymentMethod : "วอยเชอร์")</strong></div>
+    </div>
+    <div class="info-card timeline-card">
+        <h2>สถานะการดำเนินการ</h2>
+        @for (int i = 0; i < steps.Length; i++)
+        {
+            <div class="timeline-step @(i <= progress ? "complete" : "")">
+                <span>@(i + 1)</span>
+                <strong>@steps[i]</strong>
+            </div>
+        }
+    </div>
+</section>
+<section class="panel">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">ORDER ITEMS</p>
+            <h2>รายการทั้งหมดในบิลนี้</h2>
+        </div>
+        <span class="subtle">@Model.Items.Count รายการ</span>
+    </div>
+    <div class="order-items">
+        @foreach (var item in Model.Items)
+        {
+            <article>
+                <div>
+                    <strong>@item.Description</strong>
+                    <span>@item.ItemNo</span>
+                </div>
+                <span>@Fmt.Number(item.Qty) PCS</span>
+                <strong>@Fmt.Thb(item.UnitPrice)</strong>
+            </article>
+        }
+    </div>
+</section>

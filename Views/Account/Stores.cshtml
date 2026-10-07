@@ -1,0 +1,38 @@
+@model StoreListViewModel
+@{ ViewData["Title"] = "เลือกร้านค้า"; }
+<main class="store-screen">
+    <header class="top-bar">
+        <partial name="_Brand" />
+        <div class="top-actions">
+            <partial name="_VersionBadge" />
+            <form asp-action="Logout" method="post" class="inline-form">
+                <button class="quiet-button" type="submit">ออกจากระบบ</button>
+            </form>
+        </div>
+    </header>
+    <section class="store-content">
+        <p class="eyebrow">ยินดีต้อนรับกลับ</p>
+        <h1>เลือกร้านค้าที่ต้องการดูข้อมูล</h1>
+        <p class="subtle">บัญชีนี้เข้าถึงได้ @Model.Stores.Count ร้านค้า</p>
+        <div class="store-grid">
+            @foreach (var (store, active) in Model.Stores)
+            {
+                <form asp-action="SelectStore" method="post" style="display:contents">
+                    <input type="hidden" name="customerNo" value="@store.CustomerNo" />
+                    <button class="store-card" type="submit">
+                        <span class="store-code">@store.CustomerNo</span>
+                        <span class="store-info">
+                            <strong>@store.CustomerName</strong>
+                            <small>@store.SamplePhone</small>
+                        </span>
+                        <span class="store-meta">
+                            <small>Voucher ใช้งานอยู่</small>
+                            <strong>@active เล่ม</strong>
+                        </span>
+                        <span class="arrow">→</span>
+                    </button>
+                </form>
+            }
+        </div>
+    </section>
+</main>

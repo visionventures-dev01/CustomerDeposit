@@ -1,0 +1,8 @@
+@model (string Title, string Description, string Back)
+@{ Layout = "_AppLayout"; }
+<div class="empty-state">
+    <span>0 results</span>
+    <h3>@Model.Title</h3>
+    <p>@Model.Description</p>
+    <a class="secondary-button" href="@Model.Back">ล้างตัวกรอง</a>
+</div>

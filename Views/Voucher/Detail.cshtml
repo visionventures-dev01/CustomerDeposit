@@ -1,0 +1,215 @@
+@model VoucherDetailViewModel
+@{
+    Layout = "_AppLayout";
+    var v = Model.Voucher;
+    ViewData["Title"] = v.DepositNo;
+    var months = Model.AllRedemptions
+        .Select(r => (Year: r.Date.Year, Month: r.Date.Month)).Distinct().OrderBy(x => x)
+        .GroupBy(x => x.Year).OrderBy(g => g.Key).ToList();
+    var latestKey = Model.AllRedemptions.Count > 0 ? Model.AllRedemptions.Max(r => r.Date).ToString("yyyy-MM") : "";
+    var exportUrl = Url.Action("ExportCsv", new { id = v.DepositNo });
+}
+<a class="text-button page-back" asp-action="Index">
+    <span>เวาเชอร์ของฉัน</span><span aria-hidden="true">›</span><strong>@v.DepositNo</strong>
+</a>
+
+<section class="detail-hero voucher-summary-card">
+    <div class="voucher-summary-identity">
+        <h1>@v.DepositNo</h1>
+        <span class="status-badge @OrderStatusMap.VoucherKind(v.Status)">@(v.Status == VoucherStatus.Active ? "Active" : OrderStatusMap.VoucherLabel(v.Status))</span>
+    </div>
+    <div class="voucher-summary-metrics">
+        <div class="voucher-summary-metric">
+            <span>ยอดเวาเชอร์คงเหลือ</span>
+            <strong class="amount-positive">@Fmt.Thb(v.DepositBalance)</strong>
+        </div>
+        <div class="voucher-summary-metric">
+            <span>ยอดเวาเชอร์ตั้งต้น</span>
+            <strong>@Fmt.Thb(v.DepositAmount)</strong>
+        </div>
+        <div class="voucher-summary-metric">
+            <span>พนักงานขาย</span>
+            <strong>@(string.IsNullOrEmpty(v.SalesPersonName) ? "-" : v.SalesPersonName)</strong>
+        </div>
+        <div class="voucher-summary-metric">
+            <span>เบอร์ติดต่อ</span>
+            @if (string.IsNullOrEmpty(v.SalesPersonPhone))
+            {
+                <strong>-</strong>
+            }
+            else
+            {
+                <a href="tel:@v.SalesPersonPhone">@v.SalesPersonPhone</a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="panel history-panel">
+    <div class="section-heading">
+        <div class="history-heading-actions">
+            <h2>Redemption History</h2>
+            <button type="button" class="export-button export-action-button" id="open-export">EXPORT <span aria-hidden="true">⇧</span></button>
+        </div>
+        @if (Model.Years.Count > 0)
+        {
+            <form method="get" asp-action="Detail" asp-route-id="@v.DepositNo">
+                <select name="year" aria-label="เลือกปี" onchange="this.form.submit()">
+                    @foreach (var y in Model.Years)
+                    {
+                        <option value="@y" selected="@(y == Model.Year)">ปี @y</option>
+                    }
+                </select>
+            </form>
+        }
+    </div>
+
+    @if (Model.Bills.Count > 0)
+    {
+        <div class="history-list">
+            <div class="history-table-head" aria-hidden="true">
+                <span>เอกสารวันที่</span><span>เอกสารขาย</span><span>ใบลดหนี้</span><span>รายการสินค้า</span>
+                <span></span><span></span><span>ยอดเวาเชอร์คงเหลือ</span><span>สินค้าทั้งหมด</span><span></span>
+            </div>
+            @foreach (var bill in Model.Bills)
+            {
+                var f = bill.First;
+                var open = Model.Expanded == bill.Id;
+                var qtyText = string.Join(", ", bill.QuantitiesByUnit.Select(q => Fmt.Quantity(q.Value, q.Key)));
+                <article class="history-row">
+                    <div class="history-date">@Fmt.DateNumeric(f.Date)</div>
+                    <div class="document-block">
+                        <partial name="_DocLink" model="(f.Document, f.PdfKind, v.DepositNo)" />
+                        @if (!string.IsNullOrEmpty(f.SalesOrder))
+                        {
+                            <partial name="_DocLink" model='(f.SalesOrder, "sales-order", v.DepositNo)' />
+                        }
+                    </div>
+                    <div class="history-credit-note">
+                        @if (!string.IsNullOrEmpty(f.CreditNote))
+                        {
+                            <partial name="_DocLink" model='(f.CreditNote, "credit-note", v.DepositNo)' />
+                        }
+                        else
+                        {
+                            <text>-</text>
+                        }
+                    </div>
+                    <div class="item-block">
+                        <strong>@f.Description</strong>
+                        <span>@f.ItemNo</span>
+                        <a class="text-button history-expand-button"
+                           href="@Url.Action("Detail", new { id = v.DepositNo, year = Model.Year, expanded = open ? null : bill.Id })">
+                            @(open ? "เก็บรายการทั้งหมด" : "ดูรายการทั้งหมดในบิลนี้")
+                            <span aria-hidden="true">@(open ? "⌃" : "⌄")</span>
+                        </a>
+                    </div>
+                    <div class="history-quantity">x @Fmt.Quantity(f.Quantity, f.Unit)</div>
+                    <div class="history-line-amount">@Fmt.Number(f.Amount)</div>
+                    <div class="amount-negative">-@Fmt.Number(bill.Amount)</div>
+                    <div class="history-total-quantity">@qtyText</div>
+                    <a class="icon-button" target="_blank" rel="noopener" aria-label="เปิด PDF เอกสาร @f.Document"
+                       href="@Url.Action("Pdf", "Document", new { no = f.Document, kind = f.PdfKind, deposit = v.DepositNo })">⭳</a>
+                </article>
+                if (open)
+                {
+                    <div class="history-bill-items">
+                        @for (int i = 0; i < bill.Items.Count; i++)
+                        {
+                            var item = bill.Items[i];
+                            <div class="history-bill-item">
+                                <div class="history-date">@(i == 0 ? Fmt.DateNumeric(f.Date) : "")</div>
+                                <div class="document-block">
+                                    @if (i == 0)
+                                    {
+                                        <partial name="_DocLink" model="(f.Document, f.PdfKind, v.DepositNo)" />
+                                        @if (!string.IsNullOrEmpty(f.SalesOrder))
+                                        {
+                                            <partial name="_DocLink" model='(f.SalesOrder, "sales-order", v.DepositNo)' />
+                                        }
+                                    }
+                                </div>
+                                <div class="history-credit-note">
+                                    @if (i == 0)
+                                    {
+                                        if (string.IsNullOrEmpty(f.CreditNote)) { <text>-</text> }
+                                        else { <partial name="_DocLink" model='(f.CreditNote, "credit-note", v.DepositNo)' /> }
+                                    }
+                                </div>
+                                <div class="item-block"><strong>@item.Description</strong><span>@item.ItemNo</span></div>
+                                <div class="history-quantity">x @Fmt.Quantity(item.Quantity, item.Unit)</div>
+                                <div class="history-line-amount">@Fmt.Number(item.Amount)</div>
+                                <div class="amount-negative">@(i == 0 ? "-" + Fmt.Number(bill.Amount) : "")</div>
+                                <div class="history-total-quantity">@(i == 0 ? qtyText : "")</div>
+                                <span class="history-download-spacer" aria-hidden="true"></span>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <span>0 results</span>
+            <h3>@(Model.Year is null ? "ยังไม่มีประวัติการใช้เวาเชอร์" : $"ยังไม่มีรายการในปี {Model.Year}")</h3>
+            <p>เลือกปีอื่นเพื่อดูข้อมูล</p>
+        </div>
+    }
+</section>
+
+<div class="export-modal-backdrop" id="export-modal" role="presentation" hidden>
+    <div class="export-modal-wrap" role="presentation">
+        <button class="export-popover-trigger export-action-button" type="button" id="close-export">EXPORT <span aria-hidden="true">⇧</span></button>
+        <div class="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-period-title">
+            <h2 id="export-period-title">เลือกช่วงเวลา</h2>
+            @if (months.Count > 0)
+            {
+                <div class="export-period-groups">
+                    @foreach (var g in months)
+                    {
+                        <section class="export-period-group">
+                            <h3>@g.Key</h3>
+                            <div class="export-month-grid">
+                                @foreach (var m in g)
+                                {
+                                    var key = $"{m.Year:0000}-{m.Month:00}";
+                                    <label class="export-month @(key == latestKey ? "checked" : "")">
+                                        <input type="checkbox" value="@key" checked="@(key == latestKey)" />
+                                        <span>@Fmt.ThaiMonth(m.Month)</span>
+                                    </label>
+                                }
+                            </div>
+                        </section>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="subtle">ยังไม่มีเดือนที่มีรายการให้ Export</p>
+            }
+            <button class="export-download-button" type="button" id="do-export" disabled="@(months.Count == 0)">Download</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var modal = document.getElementById('export-modal');
+            document.getElementById('open-export').onclick = function () { modal.hidden = false; };
+            document.getElementById('close-export').onclick = function () { modal.hidden = true; };
+            modal.addEventListener('click', function (e) { if (e.target === modal) modal.hidden = true; });
+            modal.querySelectorAll('.export-month input').forEach(function (cb) {
+                cb.addEventListener('change', function () { cb.parentElement.classList.toggle('checked', cb.checked); });
+            });
+            document.getElementById('do-export').onclick = function () {
+                var picked = Array.prototype.map.call(modal.querySelectorAll('.export-month input:checked'), function (c) { return c.value; });
+                if (!picked.length) return;
+                window.location.href = '@Html.Raw(exportUrl)' + '&months=' + encodeURIComponent(picked.join(','));
+                modal.hidden = true;
+            };
+        })();
+    </script>
+}

@@ -1,0 +1,15 @@
+@{ ViewData["Title"] = "ไม่พบเบอร์โทรศัพท์"; }
+<main class="not-found-screen">
+    <header class="not-found-header">
+        <partial name="_Brand" />
+        <a class="text-button not-found-back" asp-action="Login">
+            <span aria-hidden="true">‹</span>
+            กลับไปหน้าเลือกเบอร์
+        </a>
+    </header>
+    <section class="phone-not-found-message" aria-live="polite">
+        <h1>ไม่พบ เบอร์โทรศัพท์ของท่าน ในระบบ</h1>
+        <p>กรุณาติดต่อพนักงานขายที่ดูแลบัญชีท่านเพื่อลงทะเบียน หรือ ติดต่อเบอร์</p>
+        <strong>02-xxx-xxxx</strong>
+    </section>
+</main>

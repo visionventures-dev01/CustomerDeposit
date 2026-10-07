@@ -1,0 +1,31 @@
+@{
+    Layout = "_LensLayout";
+    var active = ViewData["Active"] as string ?? "vouchers";
+    var storeName = ViewData["StoreName"] as string ?? "";
+}
+<div class="app-shell">
+    <header class="app-header">
+        <partial name="_Brand" />
+        <nav aria-label="เมนูหลัก" class="desktop-nav">
+            <a class="nav-item @(active == "vouchers" ? "active" : "")" asp-controller="Voucher" asp-action="Index">Voucher</a>
+            <a class="nav-item @(active == "orders" ? "active" : "")" asp-controller="Order" asp-action="Index">Order</a>
+        </nav>
+        <div class="app-actions">
+            <partial name="_VersionBadge" />
+            <a class="store-switch" asp-controller="Account" asp-action="Stores">▦ @storeName</a>
+            <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                <button class="settings-button" type="submit" aria-label="ออกจากระบบ" title="ออกจากระบบ">⚙</button>
+            </form>
+        </div>
+    </header>
+    <div class="main-column">
+        <main class="page-content">@RenderBody()</main>
+        <nav class="mobile-nav" aria-label="เมนูมือถือ">
+            <a class="@(active == "vouchers" ? "active" : "")" asp-controller="Voucher" asp-action="Index">Voucher</a>
+            <a class="@(active == "orders" ? "active" : "")" asp-controller="Order" asp-action="Index">Order</a>
+        </nav>
+    </div>
+</div>
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

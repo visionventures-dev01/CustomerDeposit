@@ -1,0 +1,2 @@
+@inject IConfiguration Config
+<span class="version-badge">v@((Config["AppVersion"] ?? "dev").TrimStart('v'))</span>

@@ -1,0 +1,12 @@
+@model ErrorViewModel
+@{ ViewData["Title"] = "Error"; }
+<main class="boot-screen" aria-label="เกิดข้อผิดพลาด">
+    <div class="brand-mark">LV</div>
+    <h1>เกิดข้อผิดพลาด</h1>
+    <p>ไม่สามารถดำเนินการได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง</p>
+    @if (Model.ShowRequestId)
+    {
+        <p>Request ID: <code>@Model.RequestId</code></p>
+    }
+    <a class="secondary-button" href="/">กลับหน้าแรก</a>
+</main>

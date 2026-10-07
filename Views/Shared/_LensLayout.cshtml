@@ -1,0 +1,33 @@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b3455" />
+    <title>Lens Voucher</title>
+    <link rel="manifest" href="~/manifest.webmanifest" />
+    <link rel="icon" href="~/lens/img/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="~/lens/img/apple-touch-icon.png" />
+    <link rel="stylesheet" href="~/lens/preflight.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lens/lens.css" asp-append-version="true" />
+</head>
+<body>
+    @RenderBody()
+    @if (TempData["Toast"] is string toast && toast.Length > 0)
+    {
+        <div class="toast" role="status" id="lens-toast">@toast</div>
+        <script>setTimeout(function () { var t = document.getElementById('lens-toast'); if (t) t.remove(); }, 2800);</script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+    @if (!Env.IsDevelopment())
+    {
+        <script>
+            if ('serviceWorker' in navigator) {
+                var base = '@Context.Request.PathBase.Value';
+                navigator.serviceWorker.register(base + '/sw.js', { scope: base + '/', updateViaCache: 'none' }).catch(function () { });
+            }
+        </script>
+    }
+</body>
+</html>

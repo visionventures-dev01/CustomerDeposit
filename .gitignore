@@ -1,0 +1,22 @@
+## .NET
+bin/
+obj/
+publish/
+*.user
+.vs/
+.vscode/
+.claude/
+
+## ค่าลับ/ค่าเฉพาะเครื่อง — ห้ามเข้า git
+appsettings.Local.json
+appsettings.Production.json
+*.env
+
+## ไฟล์ template Sneat/Kendo เดิมที่หน้าจอ Lens Voucher ไม่ได้ใช้ (ยังอยู่ในเครื่อง แต่ไม่เก็บใน git)
+wwwroot/assets/
+wwwroot/kendo2020/
+wwwroot/libs/
+wwwroot/lib/
+wwwroot/scss/
+wwwroot/tasks/
+wwwroot/Image/
